@@ -1,0 +1,6 @@
+
+<div data-zm-merchant="{{ merchant_public_key }}" data-env="{{ environment }}" data-require-checkout="false"></div>
+
+<script type="text/javascript">
+         {{ zipmoney_page_script|replace({'&lt;': '<', '&quot;':'"','&gt;':'>'})}};
+</script>

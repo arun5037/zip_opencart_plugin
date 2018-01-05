@@ -1,0 +1,66 @@
+<div class="buttons">
+    <div class="pull-right">
+        <input type="button" value="Confirm" id="button-confirm" class="btn btn-primary" data-loading-text="Loading..." />
+    </div>
+</div>
+
+<script src="https://static.zipmoney.com.au/checkout/checkout-v1.js"></script>
+
+<script type="text/javascript">
+    jQuery(function () {
+        jQuery("#button-confirm").on('click', function (e) {
+            Zip.Checkout.init({
+                redirect: "{{ iframe_checkout }}",
+                checkoutUri: "{{ checkout_uri }}",
+                redirectUri: "{{ redirect_uri }}",
+                onCheckout: function(resolve, reject, args) {
+                    jQuery.ajax({
+                        type: 'POST',
+                        url: '{{ checkout_uri }}',
+                        success: function (result) {
+                            console.log(result);
+
+                            if (result.redirect_uri) {
+                                //if the checkout is successful
+                                console.log('resolved');
+                                resolve({
+                                    data: {redirect_uri: result.redirect_uri}
+                                });
+                            } else {
+                                console.log('reject');
+                                reject();
+                            }
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            console.log('error triggered');
+                            reject();
+                        }
+                    });
+                },
+                onComplete: function (response) {
+                    console.log('onComplete is called.');
+
+                    console.log(response);
+
+                    if (response.state == "approved" || response.state == "referred") {
+                        location.href = "{{ redirect_uri }} &result=" +
+                            response.state + "&checkoutId=" + response.checkoutId;
+                    } else if((response.state == 'cancelled' || response.state == 'declined') && checkoutId){
+                        //clear the wp_options
+                        console.log('clear options. ' + checkoutId);
+                    }
+                },
+                onError: function(response){
+                    console.log('onError is called.');
+
+                    console.log(response);
+                    alert(response.message);
+                }
+            });
+
+            e.preventDefault();
+        });
+
+    });
+
+</script>

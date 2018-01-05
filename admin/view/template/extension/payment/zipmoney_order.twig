@@ -1,0 +1,227 @@
+<fieldset>
+    <legend>Transactions</legend>
+    <table class="table table-bordered">
+        <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Date Created</th>
+        </tr>
+            {% if transactions is not empty %}
+               {% for transaction in transactions %}
+                <tr>
+                    <td>{{ transaction.id }}</td>
+                    <td>{{ transaction.type }}</td>
+                    <td>{{ transaction.amount }}</td>
+                    <td>{{ transaction.date_created }}</td>
+                </tr>
+               {% endfor %}
+            {% endif %}  
+    </table>
+</fieldset>
+
+<fieldset>
+    <legend> Additional Actions</legend>
+    <div>
+        {% if order_info.order_status_id == authorized_status_id %} 
+            <button class="btn btn-primary" data-toggle="modal" data-target="#captureChargeModal">Capture</button>
+            <button class="btn btn-default" data-toggle="modal" data-target="#cancelChargeModal">Cancel</button>
+        {% elseif order_info.order_status_id == processing_status_id %}
+            <button class="btn btn-danger" data-toggle="modal" data-target="#refundModal">Refund</button>
+        {% endif %}
+    </div>
+</fieldset>
+
+
+<script type="text/javascript">
+jQuery(function () {
+    var orderId = '{{ order_info.order_id }}';
+
+    jQuery('#zip-capture').on('click', function(){
+        var captureBtn = $(this).button('loading');
+        jQuery.ajax({
+            type: 'POST',
+            url: "{{ capture_url|replace({'&amp;': '&'}) }}",
+            data : {
+                order_id: orderId
+            },
+            dataType: "json",
+            success: function(response){
+                console.log(response);
+
+                if(response.result == true){
+                    //reload the page
+                    location.reload();
+                } else {
+                    //show the error message
+                    jQuery('#capture_result').html(response.message);
+                }
+
+                captureBtn.button('reset');
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('error triggered');
+                captureBtn.button('reset');
+            }
+        });
+    });
+
+    jQuery('#zip-refund').on('click', function(){
+        var refundBtn = $(this).button('loading');
+        //console.log("{{ refund_url|replace({'&amp;': '&'}) }}");
+        jQuery.ajax({
+            type: 'POST',
+            url: "{{ refund_url|replace({'&amp;': '&'}) }}",
+            data: {
+                order_id: orderId,
+                refund_amount : jQuery('#refund_amount').val(),
+                refund_reason : jQuery('#refund_reason').val(),
+                zip_notify : jQuery('#zip_notify').is(':checked') ? 1 : 0
+            },
+            dataType: "json",
+            success: function(response) {
+                console.log(response);
+
+                if(response.result == true){
+                    //reload the page
+                    location.reload();
+                } else {
+                    //show the error message
+                    jQuery('#refund_result').html(response.message);
+                }
+
+                refundBtn.button('reset');
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('error triggered');
+                refundBtn.button('reset');
+            }
+        });
+
+    });
+
+
+    jQuery('#zip-cancel').on('click', function(){
+        //cancel charge
+        var cancelBtn = $(this).button('loading');
+        jQuery.ajax({
+            type: 'POST',
+            url: "{{ cancel_url|replace({'&amp;': '&'}) }}",
+            data : {
+                order_id: orderId
+            },
+            dataType: "json",
+            success: function(response){
+                console.log(response);
+
+                if(response.result == true){
+                    //reload the page
+                    location.reload();
+                } else {
+                    //show the error message
+                    jQuery('#cancel_result').html(response.message);
+                }
+
+                cancelBtn.button('reset');
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('error triggered');
+                cancelBtn.button('reset');
+            }
+        });
+    });
+});
+</script>
+
+
+<!-- Refund Modal -->
+<div class="modal fade" id="refundModal" tabindex="-1" role="dialog" aria-labelledby="refundModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Refund</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <div class="alert-danger" role="alert" id="refund_result"></div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label" for="available_refund_amount">Available Refund amount</label>
+                    <div class="input-group">
+                        <span class="input-group-addon">$</span>
+                        <input type="text" value="{{ available_refund_amount }}" class="form-control" name="available_refund_amount" id="available_refund_amount" disabled>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label" for="refund_amount">Refund amount</label>
+                    <div class="input-group">
+                        <span class="input-group-addon">$</span>
+                        <input type="number" class="form-control" value="0" id="refund_amount" name="refund_amount">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label" for="refund_reason">Refund reason</label>
+                    <textarea class="form-control" id="refund_reason" name="refund_reason"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="control-label" for="zip_notify">Notify customer</label>
+                    <input type="checkbox" class="form-control" id="zip_notify" name="zip_notify">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" id="zip-refund" >Confirm Refund</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Capture Modal -->
+<div class="modal fade" id="captureChargeModal" tabindex="-1" role="dialog" aria-labelledby="captureChargeModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Capture charge</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <div class="alert-danger" role="alert" id="capture_result"></div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label"><h3>Are you sure?</h3></label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="zip-capture" >Confirm Capture</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Cancel Modal -->
+<div class="modal fade" id="cancelChargeModal" tabindex="-1" role="dialog" aria-labelledby="cancelChargeModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Cancel charge</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <div class="alert-danger" role="alert" id="cancel_result"></div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label"><h3>Are you sure?</h3></label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="zip-cancel" >Confirm Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

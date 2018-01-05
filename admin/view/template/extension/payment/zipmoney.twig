@@ -1,0 +1,208 @@
+{{ header }}{{ column_left }}
+    <div id="content">
+        <div class="page-header">
+            <div class="container-fluid">
+                <div class="pull-right">
+                    <button type="submit" form="form-zipmoney" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+                    <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+                <h1>{{ heading_title }}</h1>
+                <ul class="breadcrumb">
+                     {% for breadcrumb in breadcrumbs %}
+                        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+                     {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="container-fluid">
+           {% if error_warning %}
+                <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                </div>
+           {% endif %}
+
+           <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_edit }}</h3>
+                </div>
+                <div class="panel-body">
+                    <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-zipMoney" class="form-horizontal">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+                             <div class="col-sm-10">
+                                <select name="payment_zipmoney_status" id="input-status" class="form-control">
+                                    {% if payment_zipmoney_status %}
+                      
+                                        <option value="1" selected="selected">{{ text_enabled }}</option>
+                                        <option value="0">{{ text_disabled }}</option>
+                  
+                                    {% else %}
+                      
+                                        <option value="1">{{ text_enabled }}</option>
+                                        <option value="0" selected="selected">{{ text_disabled }}</option>
+                  
+                                    {% endif %}
+                                </select>
+                             </div>
+                        </div>
+                         <div class="form-group">
+                            <label class="col-sm-2 control-label" for="zipMoney-title">Title</label>
+                            <div class="col-sm-10">
+                                <input type="text" name="payment_zipmoney_title" value="{{ payment_zipmoney_title }}" placeholder="Title" id="zipMoney-title" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label" for="zipMoney-mode">Mode</label>
+                            <div class="col-sm-10">
+                                <select name="payment_zipmoney_mode" id="zipMoney-mode" class="form-control">
+                                   {% if payment_zipmoney_mode == "sandbox" %}
+                                        <option value="sandbox" selected="selected">Sandbox</option>
+                                        <option value="live">Live</option>
+                                   {% else %}
+                                        <option value="sandbox" >Sandbox</option>
+                                        <option value="live" selected="selected">Live</option>
+                                   {% endif %}
+
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group required">
+                         <label class="col-sm-2 control-label" for="zipMoney-sandbox-merchant-public-key">Sandbox Merchant Public Key</label>
+                         <div class="col-sm-10">
+                             <input type="text" name="payment_zipmoney_sandbox_merchant_public_key" value="{{ payment_zipmoney_sandbox_merchant_public_key }}" placeholder="Sandbox Merchant Public Key" id="zipmoney-sandbox-merchant-public-key" class="form-control" />
+                             {% if error_zipmoney_sandbox_merchant_public_key %}
+                                <div class="text-danger">{{ error_zipmoney_sandbox_merchant_public_key }}</div>
+                             {% endif %}
+                         </div>
+                        </div>
+
+                        <div class="form-group required">
+                         <label class="col-sm-2 control-label" for="payment_zipMoney-sandbox-merchant-private-key">Sandbox Merchant Private Key</label>
+                         <div class="col-sm-10">
+                             <input type="text" name="payment_zipmoney_sandbox_merchant_private_key" value="{{ payment_zipmoney_sandbox_merchant_private_key }}" placeholder="Sandbox Merchant Private Key" id="zipmoney-sandbox-merchant-private-key" class="form-control" />
+                             {% if error_zipmoney_sandbox_merchant_private_key %}
+                                <div class="text-danger">{{ error_zipmoney_sandbox_merchant_private_key }}</div>
+                             {% endif %}
+                         </div>
+                        </div>
+
+                        <div class="form-group required">
+                         <label class="col-sm-2 control-label" for="zipMoney-live-merchant-public-key">Live Merchant Public Key</label>
+                         <div class="col-sm-10">
+                             <input type="text" name="payment_zipmoney_live_merchant_public_key" value="{{ payment_zipmoney_live_merchant_public_key }}" placeholder="Live Merchant Public Key" id="zipmoney-live-merchant-public-key" class="form-control" />
+                             {% if error_zipmoney_live_merchant_public_key %}
+                                <div class="text-danger">{{ error_zipmoney_live_merchant_public_key }}</div>
+                             {% endif %}
+                         </div>
+                        </div>
+
+                        <div class="form-group required">
+                         <label class="col-sm-2 control-label" for="zipMoney-live-merchant-private-key">Live Merchant Private Key</label>
+                         <div class="col-sm-10">
+                             <input type="text" name="payment_zipmoney_live_merchant_private_key" value="{{ payment_zipmoney_live_merchant_private_key }}" placeholder="Live Merchant Private Key" id="zipmoney-live-merchant-private-key" class="form-control" />
+                             {% if error_zipmoney_live_merchant_private_key %}
+                                <div class="text-danger">{{ error_zipmoney_live_merchant_private_key }}</div>
+                             {% endif %}
+                         </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label" for="zipMoney-product"><span data-toggle="tooltip" title="zipPay/zipMoney">Product</span></label>
+                            <div class="col-sm-10">
+                                <select name="payment_zipmoney_product" id="zipMoney-product" class="form-control">
+                                {% if payment_zipmoney_product == "zipPay" %}
+                                    <option value ="zipPay" selected="selected">zipPay</option>
+                                    <option value = "zipMoney">zipMoney</option>
+                                {% else %}
+                                    <option value ="zipPay">zipPay</option>
+                                    <option value = "zipMoney" selected="selected">zipMoney</option>
+                                {% endif %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label" for="zipMoney-charge-capture-option">Charge Capture Option</span></label>
+                            <div class="col-sm-10">
+                                <select name="payment_zipmoney_charge_capture_option" id="zipMoney-charge-capture-option" class="form-control">
+                                {% if payment_zipmoney_charge_capture_option == "1" %}
+                                    <option value="1" selected="selected">Capture immediately</option>
+                                    <option value="2">Authorize and capture later</option>
+                                {% else %}
+                                    <option value="1">Capture immediately</option>
+                                    <option value="2" selected="selected">Authorize and capture later</option>
+                                {% endif %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label" for="zipMoney-log-message-level">Log message level</span></label>
+                            <div class="col-sm-10">
+                                <select name="payment_zipmoney_log_message_level" id="zipMoney-log-message-level" class="form-control">
+                                {% if payment_zipmoney_log_message_level == "1" %}
+                                    <option value = "1" selected="selected">All</option>
+                                    <option value = "2">None</option>
+                                {% else %}
+                                    <option value = "1">All</option>
+                                    <option value = "2" selected="selected">None</option>
+                                {% endif %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label" for="zipMoney-iframe-checkout">In-context flow checkout</span></label>
+                            <div class="col-sm-10">
+                                <select name="payment_zipmoney_iframe_checkout" id="zipMoney-iframe-checkout" class="form-control">
+                                {% if payment_zipmoney_iframe_checkout == "1" %}
+                                    <option value = "1" selected="selected">Enable</option>
+                                    <option value = "2">Disable</option>
+                                {% else %}
+                                    <option value = "1">Enable</option>
+                                    <option value = "2" selected="selected">Disable</option>
+                                {% endif %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group required">
+                            <label class="col-sm-2 control-label" for="zipMoney-minimum-order-total">Minimum order total</label>
+                            <div class="col-sm-10">
+                                <input type="text" name="payment_zipmoney_minimum_order_total" value="{{ payment_zipmoney_minimum_order_total }}" placeholder="Minimum order total" id="zipMoney-minimum-order-total" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label" for="zipMoney-sort-order">Sort Order</label>
+                            <div class="col-sm-10">
+                                <input type="text" name="payment_zipmoney_sort_order" value="{{ payment_zipmoney_sort_order }}" placeholder="Sort Order" id="zipMoney-sort-order" class="form-control" />
+                            </div>
+                        </div>
+                    </form>
+                </div>
+           </div>
+        </div>
+        
+        <script type="text/javascript">
+            jQuery('#zipMoney-mode').change(function () {
+                var sandbox = jQuery('#zipmoney-sandbox-merchant-public-key, #zipmoney-sandbox-merchant-private-key').closest('div.form-group');
+                var production = jQuery('#zipmoney-live-merchant-public-key, #zipmoney-live-merchant-private-key').closest('div.form-group');
+
+                if (jQuery(this).val() == 'sandbox') {
+                    sandbox.show();
+                    production.hide();
+                } else {
+                    sandbox.hide();
+                    production.show();
+                }
+            }).change();
+
+
+            $('input[name=\'zipmoney_ipn_token\']').change(function () {
+                $('#input-ipn-url').val('<?php echo HTTPS_CATALOG; ?>index.php?route=payment/zipmoney/ipn&token=' + $(this).val());
+            });
+        </script>
+    </div>
+{{ footer }}
